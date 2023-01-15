@@ -29,19 +29,25 @@ led = RGBLED(17, 18, 19)
 #
 class lane(threading.Thread):
 
+    laneNo = None
+    laneInput = None
+    log = None
+
     timeStart = 0
     timeStop = 0
     timeTotal = 0
+
     run = False
 
     ##
     # Constructor
     #
-    def __init__(self, laneNo, laneInput, *args, **kwargs):
+    def __init__(self, laneNo, laneInput, log, *args, **kwargs):
         super(lane,self).__init__(*args, **kwargs)
         self.laneNo = laneNo
         self.laneInput = laneInput
         self.DID = DigitalInputDevice(self.laneInput, True)
+        self.log = log
     
     ##
     # Return the status of the lane sensor
@@ -54,14 +60,20 @@ class lane(threading.Thread):
         else:
             return True
     
+    ##
+    #
+    #
     def run(self):
+        # Flip "run" flag True
         self.run = True
-        while(self.DID.value == 1 and self.run == True):
+        self.log.debug("Running lane {}".format(self.laneNo))
+        while(self.getSensor and self.run):
             # Poll the sensor super-fast
             pass
         # As soon as the sensor trips, log the time and return
         if(self.run == True):
             self.timeStop = time.time()
+            self.log.debug("Lane {} finished at {}".format(self.laneNo, self.timeStop))
     
 
     ##
@@ -69,11 +81,36 @@ class lane(threading.Thread):
     #
     def stop(self):
         self.run = False
+    
+
+    ##
+    # Return the lane number
+    #
+    def getLaneNo(self):
+        return self.laneNo
+    
+
+    ##
+    # Returns if a car is sensed by the sensor or not
+    #
+    # True if a car is there, False otherwise
+    #
+    def getSensor(self):
+        if(self.DID.value == 0):
+            return True
+        return False
 
 
+    ##
+    #
+    #
     def setTimeStart(self, time):
         self.timeStart = time
     
+
+    ##
+    #
+    #
     def totalTime(self):
         if self.timeStart == 0 or self.timeStop == 0:
             # Start or Stop haven't been set yet - puke
@@ -92,6 +129,8 @@ class pinewood:
     lanes = []
     log = None
 
+    timeout = None
+
 
     ##
     # Constructor
@@ -101,41 +140,58 @@ class pinewood:
         # DEBUG:
         self.log.setDisplayLevel('TRACE')
         self.lanes = lanes
+
+        self.timeout = 15
     
 
     ##
     # Main program to run
     # This is messy and will likely require cleanup/refactor
     #
-    def run(self):
-
-        # Get the starting timestamp (as seconds)
-        start = time.time()
-        timeout = 15
+    def race(self):
 
         # Construct threads from lanes
         threads = []
-
         for i in self.lanes:
             t = lane(i['no'], i['input'])
             threads.append(t)
 
-        # Start all threads
+        # Await starting gate
+        # TODO: Implement me!
+        # while startingGate == False:
+        #     pass
+
+        # Get the starting timestamp (as seconds)
+        start = time.time()
+
+        # Start all threads.  This can happen after the starting gate because:
+        # A - we don't want a false-positive before the start
+        # B - spinning up the threads will easily happen in a few MS
+        # C - spinup delay isn't critical to functionality
+        self.log.info("Starting race at {}".format(start))
         for t in threads:
             t.start()
         
-        while start + timeout > time.time():
-            alive = 0
+
+        # Wait until the timeout has lapsed or all threads are dead
+        alive = True
+        while (start + self.timeout > time.time() and alive):
             # Check if threads are still alive or not
             # We should do an `is_alive()`` on all threads in case a car DNF and `join()` doesn't return
+            alive = False
             for t in threads:
                 if t.is_alive():
+                    alive = True
                     break   # A thread is still running - we aren't finished yet
             sleep(0.5)  # We shouldn't hog CPU with checking if children have returned
         # All threads have terminated OR we are over the timeout
 
+        self.log.info("Race completed")
+
+        # In case we have a DNF, loop threads and kill
         for t in threads:
             if t.is_alive():
+                self.log.info("Lane {} DNF".format(t.getLaneNo()))
                 t.stop()
 
         # Give the lanes the start time AFTER the race is over.
@@ -145,6 +201,9 @@ class pinewood:
 
         # Sort lanes by time
         threads.sort(key = lambda x : x.totalTime())
+
+        for index, t in enumerate(threads):
+            self.log.info("Place: {}, Lane {}".format(index, t.getLaneNo()))
 
 
 

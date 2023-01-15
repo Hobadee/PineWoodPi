@@ -8,4 +8,4 @@ lanes = [{'no':1,'input':20},
         {'no':4,'input':23}]
 
 pinewood = pinewood(lanes)
-pinewood.run()
+pinewood.race()
