@@ -32,6 +32,7 @@ class lane(threading.Thread):
     timeStart = 0
     timeStop = 0
     timeTotal = 0
+    run = False
 
     ##
     # Constructor
@@ -54,12 +55,22 @@ class lane(threading.Thread):
             return True
     
     def run(self):
-        while(self.DID.value == 1):
+        self.run = True
+        while(self.DID.value == 1 and self.run == True):
             # Poll the sensor super-fast
             pass
         # As soon as the sensor trips, log the time and return
-        self.timeStop = time.time()
+        if(self.run == True):
+            self.timeStop = time.time()
     
+
+    ##
+    # Mechanism to stop the thread
+    #
+    def stop():
+        self.run = False
+
+
     def setTimeStart(self, time):
         self.timeStart = time
     
@@ -125,7 +136,7 @@ class pinewood:
 
         for t in threads:
             if t.is_alive():
-                t.kill()
+                t.stop()
 
         # Give the lanes the start time AFTER the race is over.
         # Doing this before could take away from processing to monitor the finish
