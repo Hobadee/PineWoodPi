@@ -36,6 +36,7 @@ class lane(threading.Thread):
     timeStart = 0
     timeStop = 0
     timeTotal = 0
+    dnf = False
 
     run = False
 
@@ -67,7 +68,7 @@ class lane(threading.Thread):
         # Flip "run" flag True
         self.run = True
         self.log.debug("Running lane {}".format(self.laneNo))
-        while(self.getSensor and self.run):
+        while(self.getSensor() and self.run):
             # Poll the sensor super-fast
             pass
         # As soon as the sensor trips, log the time and return
@@ -112,11 +113,26 @@ class lane(threading.Thread):
     #
     #
     def totalTime(self):
+        if (self.dnf):
+            return 999
         if self.timeStart == 0 or self.timeStop == 0:
             # Start or Stop haven't been set yet - puke
             return 0
         return self.timeStop - self.timeStart
-        
+
+
+    ##
+    # 
+    #
+    def setDNF(self, dnf):
+        self.dnf = dnf
+
+
+    ##
+    #
+    #
+    def getDNF(self):
+        return self.dnf
 
 
 ##
@@ -153,9 +169,16 @@ class pinewood:
         # Construct threads from lanes
         threads = []
         for i in self.lanes:
-            t = lane(i['no'], i['input'])
+            t = lane(i['no'], i['input'], self.log)
             threads.append(t)
 
+
+        #
+        # Ensure all lanes are clear
+        #
+        # TODO: Implement me!
+
+        
         # Await starting gate
         # TODO: Implement me!
         # while startingGate == False:
@@ -193,6 +216,7 @@ class pinewood:
             if t.is_alive():
                 self.log.info("Lane {} DNF".format(t.getLaneNo()))
                 t.stop()
+                t.setDNF(True)
 
         # Give the lanes the start time AFTER the race is over.
         # Doing this before could take away from processing to monitor the finish
@@ -203,7 +227,7 @@ class pinewood:
         threads.sort(key = lambda x : x.totalTime())
 
         for index, t in enumerate(threads):
-            self.log.info("Place: {}, Lane {}".format(index, t.getLaneNo()))
+            self.log.info("Place: {}, Lane {}, Time: {}".format(index + 1, t.getLaneNo(), t.totalTime()))
 
 
 

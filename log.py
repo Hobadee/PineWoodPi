@@ -228,7 +228,7 @@ class log:
     ##
     # Print a log
     #
-    def output(self, log, facility):
+    def output(self, log, facility=None):
         pass
         print("{} [{}]: {}".format(log.getTimestamp(), log.getLevel(), log.getLog()))
 
