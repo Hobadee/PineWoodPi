@@ -104,9 +104,10 @@ class pinewood:
 
         # Construct threads from lanes
         threads = []
-        for item in self.lanes:
-            thread = lane(item['no'], item['input'])
-            threads.append(thread)
+
+        for i in self.lanes:
+            t = lane(i['no'], i['input'])
+            threads.append(t)
 
         # Start all threads
         for t in threads:
@@ -128,11 +129,11 @@ class pinewood:
 
         # Give the lanes the start time AFTER the race is over.
         # Doing this before could take away from processing to monitor the finish
-        for lane in lanes:
-            lane.setTimeStart(start)
+        for t in threads:
+            t.setTimeStart(start)
 
         # Sort lanes by time
-        lanes.sort(key = lambda x : x.totalTime())
+        threads.sort(key = lambda x : x.totalTime())
 
 
 
