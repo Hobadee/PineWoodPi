@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import time
+import threading                    # To make logs thread-safe
 from enum import Enum, unique
 
 @unique
@@ -75,12 +76,64 @@ class logEntry:
 class log:
 
     timestampStart = None
-    defaultLevel = 'INFO'
+    defaultLevel = None
+    displayLevel = None
     logs = []
+    # TODO: Implement list of outputs
+    # Each output should have it's own displayLevel
+    # Possible outputs: print, serial, web, etc...
+    outputs = []
     
-    def __init__(self):
+    def __init__(self, defaultLevel=None, displayLevel=None):
         # Take a timestamp of when logging was started
         self.timestampStart = time.time()
+        # Enable this to be thread-safe
+        self._lock = threading.Lock()
+
+        self.defaultLevel = self.mapENUM('INFO')
+        self.displayLevel = self.mapENUM('INFO')
+
+        if(defaultLevel):
+            self.defaultLevel = defaultLevel
+        if(displayLevel):
+            self.displayLevel = displayLevel
+    
+    
+    ##
+    # TODO: Take ENUMs into account
+    #
+    def setDisplayLevel(self, displayLevel):
+        displayLevel = self.mapENUM(displayLevel)
+        self.displayLevel = displayLevel
+    
+
+    ##
+    # TODO: Take ENUMs into account
+    #
+    def setDefaultLevel(self, defaultLevel):
+        defaultLevel = self.mapENUM(defaultLevel)
+        self.defaultLevel = defaultLevel
+
+    
+    ##
+    # Map a level to an ENUM
+    # TODO: Finish implementation!
+    #
+    def mapENUM(self, level):
+        try:
+            # Try mapping to an ENUM
+            if(isinstance(level, int)):
+                level = logLevels(level)
+            if(isinstance(level, str)):
+                level = logLevels[level]
+            #if(isinstance(level, logLevels)):
+                # We are all good 
+        except:
+            # We can't map to an ENUM.
+            self.write("Cannot map \"{}\" to a logLevels ENUM!  Will be logged as {}".format(level, self.defaultLevel), level="WARNING")
+            level = self.defaultLevel
+        finally:
+            return level
     
 
     ##
@@ -95,41 +148,87 @@ class log:
     # 5 - DEBUG
     # 6 - TRACE
     #
-    def write(self, log, level=None, output=False):
+    # forceOP will force the log to be output, even if that message would normally be hidden
+    #
+    def write(self, log, level=None, forceOP=False):
+
+        # If level hasn't been set, default it
         if(level == None):
             level = self.defaultLevel
 
-        self.logs.append(logEntry(log, level))
+        # Map level to an ENUM
+        level = self.mapENUM(level)
 
-        if(output):
-            opLog = self.last()
-            self.print(opLog)
+        # Make the write operation thread-safe
+        with self._lock:
+            self.logs.append(logEntry(log, level))
+
+            if(self.displayLevel.value >= level.value or forceOP):
+                opLog = self.getLast()
+                self.output(opLog)
     
 
     ##
+    # Log a FATAL message
     #
+    def fatal(self, log):
+        self.write(log, level='FATAL')
+    
+
+    ##
+    # Log an ERROR message
     #
-    def last(self):
+    def error(self, log):
+        self.write(log, level='ERROR')
+    
+
+    ##
+    # Log a WARNING message
+    #
+    def warning(self, log):
+        self.write(log, level='WARNING')
+    
+
+    ##
+    # Log an INFO message
+    #
+    def info(self, log):
+        self.write(log, level='INFO')
+
+
+    ##
+    # Log a DEBUG message
+    #
+    def debug(self, log):
+        self.write(log, level='DEBUG')
+    
+
+    ##
+    # Log a TRACE message
+    #
+    def trace(self, log):
+        self.write(log, level='TRACE')
+
+
+    ##
+    # Returns the last log
+    #
+    def getLast(self):
         return self.logs[-1]
 
     
+    ##
+    # Print ALL logs to the terminal
+    #
     def dump(self):
         for log in self.logs:
-            self.print(log)
+            self.output(log)
 
 
     ##
-    # Print all logs
+    # Print a log
     #
-    def print(self, log):
+    def output(self, log, facility):
+        pass
         print("{} [{}]: {}".format(log.getTimestamp(), log.getLevel(), log.getLog()))
 
-
-log = log()
-log.write("asdf")
-log.write("Straight ENUM", logLevels.ERROR)
-log.write("Integer", 6)
-log.write("String", "FATAL")
-log.write("Test realtimne OP", output=True)
-print("Dumping logs:")
-log.dump()
