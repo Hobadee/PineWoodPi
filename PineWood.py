@@ -67,7 +67,7 @@ class lane(threading.Thread):
     ##
     # Mechanism to stop the thread
     #
-    def stop():
+    def stop(self):
         self.run = False
 
 
