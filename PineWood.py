@@ -14,13 +14,14 @@ from gpiozero import LED, RGBLED                        # Used for LEDs and RGB 
 from gpiozero import Button, DigitalInputDevice         # Used for button and break-beam
 
 from log import *
+import laneOutput                                       # Used to display lane status
 
-lanes = [{'no':1,'input':20},
-        {'no':2,'input':21},
-        {'no':3,'input':22},
-        {'no':4,'input':23}]
+lanes = [{'no':1,'input':20,'rLED':0,'gLED':0},
+        {'no':2,'input':21,'rLED':0,'gLED':0},
+        {'no':3,'input':22,'rLED':0,'gLED':0},
+        {'no':4,'input':23,'rLED':0,'gLED':0}]
 
-led = RGBLED(17, 18, 19)
+#led = RGBLED(17, 18, 19)
 
 ##
 # Class to init/store lane info
@@ -40,15 +41,18 @@ class lane(threading.Thread):
 
     run = False
 
+    laneOutput = None
+
     ##
     # Constructor
     #
-    def __init__(self, laneNo, laneInput, log, *args, **kwargs):
+    def __init__(self, laneNo, laneInput, laneOutput, log, *args, **kwargs):
         super(lane,self).__init__(*args, **kwargs)
         self.laneNo = laneNo
         self.laneInput = laneInput
         self.DID = DigitalInputDevice(self.laneInput, True)
         self.log = log
+        self.laneOutput = laneOutput
     
     ##
     # Return the status of the lane sensor
@@ -169,7 +173,8 @@ class pinewood:
         # Construct threads from lanes
         threads = []
         for i in self.lanes:
-            t = lane(i['no'], i['input'], self.log)
+            op = laneOutput(rLED = t['rLED'], gLED = t['gLED'])
+            t = lane(i['no'], i['input'], op, self.log)
             threads.append(t)
 
 
