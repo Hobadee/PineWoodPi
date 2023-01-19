@@ -14,7 +14,7 @@ class lane(threading.Thread):
     timeStart = 0
     timeStop = 0
     timeTotal = 0
-    dnf = False
+    dnf = True          # By default, lanes have not finished
 
     run = False
 
@@ -57,6 +57,7 @@ class lane(threading.Thread):
             self.timeStop = time.time()
             self.log.debug("Lane {} finished at {}".format(self.laneNo, self.timeStop))
     
+            self.dnf = False                # Flag that the lane finished
 
     ##
     # Mechanism to stop the thread
@@ -103,14 +104,18 @@ class lane(threading.Thread):
 
 
     ##
-    # 
-    #
-    def setDNF(self, dnf):
-        self.dnf = dnf
-
-
-    ##
-    #
+    # If the lane Did Not Finish, return true
     #
     def getDNF(self):
         return self.dnf
+    
+
+    ##
+    # Returns the place this lane has received
+    # If no place set or DNF, return None
+    #
+    def getPlace(self):
+        if(self.place and self.dnf != True):
+            return self.place
+        else:
+            return None
