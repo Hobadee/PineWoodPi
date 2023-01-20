@@ -1,8 +1,16 @@
+#!/usr/bin/python3
+
+
+import laneOutputDisplayReady
+
+
 ##
 # Class to display lane status
 # We *JUST* display a status here - other classes check the status and request we display
 #
 class laneOutput:
+
+    lane = None
     redLED = None
     greenLED = None
 
@@ -10,7 +18,8 @@ class laneOutput:
     ##
     # Constructor
     #
-    def __init__(self, rLED, gLED):
+    def __init__(self, lane, rLED, gLED):
+        self.lane = lane
         self.redLED = rLED
         self.greenLED = gLED
     
@@ -36,9 +45,22 @@ class laneOutput:
     ##
     # What to show when the race is finished and we are displaying standings
     #
-    def showPlace():
+    def showPlace(place = None):
         # First = Green
         # Second = Yellow (Green/Red)
         # Third = Red
         # Fourth = Off
+        if (place):
+            pass
+        else:
+            self.lane.getPlace()
+        pass
+
+
+    ##
+    # Displays whether the lane is ready to race or not.
+    #
+    def displayReady(self):
+        self.laneOPDisplayReady = laneOutputDisplayReady()
+
         pass

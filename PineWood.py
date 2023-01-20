@@ -4,7 +4,6 @@ import os                                               # Used for OS interactio
 from time import sleep                                  # Used for sleep()
 import time                                             # Used for timestamps
 
-import threading                                        # Lets us multithread
 
 import board                                            # Used to reference pins by name on the Pi
 import digitalio                                        # Used to control I/Os on the Pi
@@ -13,14 +12,9 @@ import busio                                            # Used for SPI
 from gpiozero import LED, RGBLED                        # Used for LEDs and RGB LEDs
 from gpiozero import Button, DigitalInputDevice         # Used for button and break-beam
 
-from log import *
-import lane                                             # Used to time a lane
+import lane as laneInput                                # Used to time a lane
 import laneOutput                                       # Used to display lane status
 
-lanes = [{'no':1,'input':20,'rLED':0,'gLED':0},
-        {'no':2,'input':21,'rLED':0,'gLED':0},
-        {'no':3,'input':22,'rLED':0,'gLED':0},
-        {'no':4,'input':23,'rLED':0,'gLED':0}]
 
 #led = RGBLED(17, 18, 19)
 
@@ -33,22 +27,34 @@ lanes = [{'no':1,'input':20,'rLED':0,'gLED':0},
 # Right now this isn't a class but a function.  Will need to be refactored
 class pinewood:
 
-    lanes = []
+    startBtn = None
+    lanesIP = []                # Lane Inputs
+    lanesOP = []                # Lane Outputs
     log = None
 
-    timeout = None
+    timeout = 15
 
 
     ##
     # Constructor
     #
-    def __init__(self, lanes):
-        self.log = log()
-        # DEBUG:
-        self.log.setDisplayLevel('TRACE')
-        self.lanes = lanes
+    def __init__(self, lanes, startBtn, log = log()):
+        self.log = log
+        self.startBtn = Button(startBtn, True)
 
-        self.timeout = 15
+        # Construct lane objects
+        for lane in self.lanes:
+            ip = laneInput(lane['no'], lane['input'], self.log)
+            op = laneOutput(lane = ip, rLED = t['rLED'], gLED = t['gLED'])
+            self.lanesIP.append(t)
+            self.lanesOP.append(op)
+    
+
+    ##
+    #
+    #
+    def setTimeout(self, timeout):
+        self.timeout = timeout
     
 
     ##
@@ -57,24 +63,18 @@ class pinewood:
     #
     def race(self):
 
-        # Construct threads from lanes
-        threads = []
-        for i in self.lanes:
-            op = laneOutput(rLED = t['rLED'], gLED = t['gLED'])
-            t = lane(i['no'], i['input'], op, self.log)
-            threads.append(t)
-
-
         #
         # Ensure all lanes are clear
         #
         # TODO: Implement me!
+        for lane in self.lanesOP:
+            lane.displayReady()
 
         
         # Await starting gate
-        # TODO: Implement me!
-        # while startingGate == False:
-        #     pass
+        self.log.info("Awaiting starting gate.")
+        while self.startBtn == False:
+            pass
 
         # Get the starting timestamp (as seconds)
         start = time.time()
@@ -108,7 +108,6 @@ class pinewood:
             if t.is_alive():
                 self.log.info("Lane {} DNF".format(t.getLaneNo()))
                 t.stop()
-                t.setDNF(True)
 
         # Give the lanes the start time AFTER the race is over.
         # Doing this before could take away from processing to monitor the finish

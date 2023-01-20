@@ -1,4 +1,8 @@
-import lane
+#!/usr/bin/python3
+
+
+import threading                                        # Lets us multithread
+
 
 ##
 # Class to init/store lane info
@@ -15,6 +19,7 @@ class lane(threading.Thread):
     timeStop = 0
     timeTotal = 0
     dnf = True          # By default, lanes have not finished
+    place = None
 
     run = False
 
@@ -54,10 +59,9 @@ class lane(threading.Thread):
             pass
         # As soon as the sensor trips, log the time and return
         if(self.run == True):
-            self.timeStop = time.time()
-            self.log.debug("Lane {} finished at {}".format(self.laneNo, self.timeStop))
-    
+            self.timeStop = time.time()     # Log the time
             self.dnf = False                # Flag that the lane finished
+            self.log.debug("Lane {} finished at {}".format(self.laneNo, self.timeStop))    
 
     ##
     # Mechanism to stop the thread
@@ -96,6 +100,7 @@ class lane(threading.Thread):
     #
     def totalTime(self):
         if (self.dnf):
+            # Returning a high value means a sort() will work
             return 999
         if self.timeStart == 0 or self.timeStop == 0:
             # Start or Stop haven't been set yet - puke
