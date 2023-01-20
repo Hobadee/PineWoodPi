@@ -12,7 +12,7 @@ import busio                                            # Used for SPI
 from gpiozero import LED, RGBLED                        # Used for LEDs and RGB LEDs
 from gpiozero import Button, DigitalInputDevice         # Used for button and break-beam
 
-import lane as laneInput                                # Used to time a lane
+import laneInput                                        # Used to time a lane
 import laneOutput                                       # Used to display lane status
 
 
@@ -28,8 +28,7 @@ import laneOutput                                       # Used to display lane s
 class pinewood:
 
     startBtn = None
-    lanesIP = []                # Lane Inputs
-    lanesOP = []                # Lane Outputs
+    lanes = []                  # Lanes
     log = None
 
     timeout = 15
@@ -44,10 +43,10 @@ class pinewood:
 
         # Construct lane objects
         for lane in self.lanes:
-            ip = laneInput(lane['no'], lane['input'], self.log)
-            op = laneOutput(lane = ip, rLED = t['rLED'], gLED = t['gLED'])
-            self.lanesIP.append(t)
-            self.lanesOP.append(op)
+            ipop = {}
+            ipop['ip'] = laneInput(lane['no'], lane['input'], self.log)
+            ipop['op'] = laneOutput(lane = ip, rLED = t['rLED'], gLED = t['gLED'])
+            self.lanes.append(ipop)
     
 
     ##
