@@ -23,18 +23,15 @@ class laneInput(threading.Thread):
 
     run = False
 
-    laneOutput = None
-
     ##
     # Constructor
     #
-    def __init__(self, laneNo, laneInput, laneOutput, log, *args, **kwargs):
+    def __init__(self, laneNo, laneInput, log, *args, **kwargs):
         super(lane,self).__init__(*args, **kwargs)
         self.laneNo = laneNo
         self.laneInput = laneInput
         self.DID = DigitalInputDevice(self.laneInput, True)
         self.log = log
-        self.laneOutput = laneOutput
     
     ##
     # Return the status of the lane sensor

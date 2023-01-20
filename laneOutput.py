@@ -10,7 +10,6 @@ import laneOutputDisplayReady
 #
 class laneOutput:
 
-    lane = None
     redLED = None
     greenLED = None
 
@@ -18,8 +17,7 @@ class laneOutput:
     ##
     # Constructor
     #
-    def __init__(self, lane, rLED, gLED):
-        self.lane = lane
+    def __init__(self, rLED, gLED):
         self.redLED = rLED
         self.greenLED = gLED
     
@@ -45,22 +43,24 @@ class laneOutput:
     ##
     # What to show when the race is finished and we are displaying standings
     #
-    def showPlace(place = None):
+    def showPlace(place = None, lane = None):
         # First = Green
         # Second = Yellow (Green/Red)
         # Third = Red
         # Fourth = Off
-        if (place):
+        if (place == None and lane == None):
+            # Throw an error or some shit
             pass
-        else:
-            self.lane.getPlace()
+        if (lane):
+            place = lane.getPlace()
+        # Display based off place
         pass
 
 
     ##
     # Displays whether the lane is ready to race or not.
     #
-    def displayReady(self):
+    def displayReady(self, lane):
         self.laneOPDisplayReady = laneOutputDisplayReady()
 
         pass

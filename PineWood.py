@@ -46,8 +46,8 @@ class pinewood:
         # Construct lane objects
         for lane in lanes:
             ipop = {}
-            ipop['op'] = laneInput.laneOutput(lane = ip, rLED = t['rLED'], gLED = t['gLED'])
-            ipop['ip'] = laneInput.laneInput(lane['no'], lane['input'], ipop['op'], log = self.log)
+            ipop['ip'] = laneInput.laneInput(lane['no'], lane['input'], self.log)
+            ipop['op'] = laneInput.laneOutput(rLED = t['rLED'], gLED = t['gLED'])
             self.log.trace("ipop={}".format(ipop))
             self.lanes.append(ipop)
 
