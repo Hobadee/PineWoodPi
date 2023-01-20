@@ -9,7 +9,7 @@ import threading                                        # Lets us multithread
 #
 # Right now we are definitely violating the principle of single-responsibility
 #
-class lane(threading.Thread):
+class laneInput(threading.Thread):
 
     laneNo = None
     laneInput = None

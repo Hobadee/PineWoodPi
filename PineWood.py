@@ -15,6 +15,8 @@ from gpiozero import Button, DigitalInputDevice         # Used for button and br
 import laneInput                                        # Used to time a lane
 import laneOutput                                       # Used to display lane status
 
+from log import *
+
 
 #led = RGBLED(17, 18, 19)
 
@@ -37,16 +39,19 @@ class pinewood:
     ##
     # Constructor
     #
-    def __init__(self, lanes, startBtn, log = log()):
+    def __init__(self, lanes, startBtn, log):
         self.log = log
         self.startBtn = Button(startBtn, True)
 
         # Construct lane objects
-        for lane in self.lanes:
+        for lane in lanes:
             ipop = {}
-            ipop['ip'] = laneInput(lane['no'], lane['input'], self.log)
-            ipop['op'] = laneOutput(lane = ip, rLED = t['rLED'], gLED = t['gLED'])
+            ipop['op'] = laneInput.laneOutput(lane = ip, rLED = t['rLED'], gLED = t['gLED'])
+            ipop['ip'] = laneInput.laneInput(lane['no'], lane['input'], ipop['op'], log = self.log)
+            self.log.trace("ipop={}".format(ipop))
             self.lanes.append(ipop)
+
+        self.log.debug(self.lanes)
     
 
     ##
@@ -66,8 +71,8 @@ class pinewood:
         # Ensure all lanes are clear
         #
         # TODO: Implement me!
-        for lane in self.lanesOP:
-            lane.displayReady()
+        for lane in self.lanes:
+            lane['op'].displayReady()
 
         
         # Await starting gate
@@ -83,8 +88,8 @@ class pinewood:
         # B - spinning up the threads will easily happen in a few MS
         # C - spinup delay isn't critical to functionality
         self.log.info("Starting race at {}".format(start))
-        for t in threads:
-            t.start()
+        for t in self.lanes:
+            t['ip'].start()
         
 
         # Wait until the timeout has lapsed or all threads are dead
@@ -93,31 +98,31 @@ class pinewood:
             # Check if threads are still alive or not
             # We should do an `is_alive()`` on all threads in case a car DNF and `join()` doesn't return
             alive = False
-            for t in threads:
-                if t.is_alive():
+            for t in self.lanes:
+                if t['ip'].is_alive():
                     alive = True
                     break   # A thread is still running - we aren't finished yet
             sleep(0.5)  # We shouldn't hog CPU with checking if children have returned
         # All threads have terminated OR we are over the timeout
 
         self.log.info("Race completed")
-
+        
         # In case we have a DNF, loop threads and kill
-        for t in threads:
-            if t.is_alive():
+        for t in self.lanes:
+            if t['ip'].is_alive():
                 self.log.info("Lane {} DNF".format(t.getLaneNo()))
-                t.stop()
+                t['ip'].stop()
 
         # Give the lanes the start time AFTER the race is over.
         # Doing this before could take away from processing to monitor the finish
-        for t in threads:
-            t.setTimeStart(start)
+        for t in self.lanes:
+            t['ip'].setTimeStart(start)
 
         # Sort lanes by time
-        threads.sort(key = lambda x : x.totalTime())
+        self.lanes.sort(key = lambda x : x['ip'].totalTime())
 
-        for index, t in enumerate(threads):
-            self.log.info("Place: {}, Lane {}, Time: {}".format(index + 1, t.getLaneNo(), t.totalTime()))
+        for index, t in enumerate(self.lanes):
+            self.log.info("Place: {}, Lane {}, Time: {}".format(index + 1, t['ip'].getLaneNo(), t['ip'].totalTime()))
 
 
 

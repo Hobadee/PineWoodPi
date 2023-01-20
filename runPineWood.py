@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 
-from PineWood import *
+from PineWood import pinewood
 from log import *
 
 
@@ -11,7 +11,7 @@ from log import *
 
 
 # Configure start button sensor
-startBtn = None
+startBtn = 1
 
 # Configure lanes and sensors
 lanes = [{'no':1,'input':4,'rLED':22,'gLED':23},
