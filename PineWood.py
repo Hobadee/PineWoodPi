@@ -47,11 +47,8 @@ class pinewood:
         for lane in lanes:
             ipop = {}
             ipop['ip'] = laneInput.laneInput(lane['no'], lane['input'], self.log)
-            ipop['op'] = laneInput.laneOutput(rLED = t['rLED'], gLED = t['gLED'])
-            self.log.trace("ipop={}".format(ipop))
+            ipop['op'] = laneOutput.laneOutput(rLED = lane['rLED'], gLED = lane['gLED'])
             self.lanes.append(ipop)
-
-        self.log.debug(self.lanes)
     
 
     ##
@@ -72,8 +69,7 @@ class pinewood:
         #
         # TODO: Implement me!
         for lane in self.lanes:
-            lane['op'].displayReady()
-
+            lane['op'].displayReady(lane['ip'])
         
         # Await starting gate
         self.log.info("Awaiting starting gate.")
@@ -110,7 +106,7 @@ class pinewood:
         # In case we have a DNF, loop threads and kill
         for t in self.lanes:
             if t['ip'].is_alive():
-                self.log.info("Lane {} DNF".format(t.getLaneNo()))
+                self.log.info("Lane {} DNF".format(t['ip'].getLaneNo()))
                 t['ip'].stop()
 
         # Give the lanes the start time AFTER the race is over.

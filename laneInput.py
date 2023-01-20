@@ -2,6 +2,8 @@
 
 
 import threading                                        # Lets us multithread
+from gpiozero import DigitalInputDevice
+import time
 
 
 ##
@@ -27,12 +29,14 @@ class laneInput(threading.Thread):
     # Constructor
     #
     def __init__(self, laneNo, laneInput, log, *args, **kwargs):
-        super(lane,self).__init__(*args, **kwargs)
+        #super(laneInput,self).__init__(*args, **kwargs)
+        super().__init__()
+        self.log = log
         self.laneNo = laneNo
         self.laneInput = laneInput
         self.DID = DigitalInputDevice(self.laneInput, True)
-        self.log = log
-    
+
+        
     ##
     # Return the status of the lane sensor
     # False - beam broken

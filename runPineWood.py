@@ -16,7 +16,7 @@ startBtn = 1
 # Configure lanes and sensors
 lanes = [{'no':1,'input':4,'rLED':22,'gLED':23},
         {'no':2,'input':17,'rLED':24,'gLED':25},
-        {'no':3,'input':16,'rLED':5,'gLED':6},
+        {'no':3,'input':18,'rLED':5,'gLED':6},
         {'no':4,'input':27,'rLED':20,'gLED':21}]
 
 

@@ -61,6 +61,6 @@ class laneOutput:
     # Displays whether the lane is ready to race or not.
     #
     def displayReady(self, lane):
-        self.laneOPDisplayReady = laneOutputDisplayReady()
+#        self.laneOPDisplayReady = laneOutputDisplayReady()
 
         pass
