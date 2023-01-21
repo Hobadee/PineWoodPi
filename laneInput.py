@@ -125,7 +125,7 @@ class laneInput(threading.Thread):
         else:
             return None
     
-    def setPlace(self):
+    def setPlace(self, place):
         self.place = place
 
 
