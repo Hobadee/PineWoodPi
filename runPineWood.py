@@ -46,7 +46,8 @@ startGate = gate.gate(startBtn, startRgLED)
 pinewood = pinewood(lanes, startGate, log)
 pinewood.setTimeout(5)
 
-pinewood.race()
+while True:
+    pinewood.race()
 
 
 # General flow

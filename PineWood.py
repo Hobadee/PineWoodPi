@@ -94,6 +94,7 @@ class pinewood:
 
         # Get the starting timestamp (as seconds)
         start = time.time()
+        self.gate.yellow()
 
         # Start all threads.  This can happen after the starting gate because:
         # A - we don't want a false-positive before the start
@@ -101,6 +102,7 @@ class pinewood:
         # C - spinup delay isn't critical to functionality
         self.log.info("Starting race at {}".format(start))
         for t in self.lanes:
+            t['ip'].daemon = True
             t['ip'].start()
         
 
@@ -134,6 +136,6 @@ class pinewood:
         self.lanes.sort(key = lambda x : x['ip'].totalTime())
 
         for index, t in enumerate(self.lanes):
-            self.log.info("Place: {}, Lane {}, Time: {}".format(index + 1, t['ip'].getLaneNo(), t['ip'].totalTime()))
-            t['op'].showPlace()
-
+            place = index + 1
+            self.log.info("Place: {}, Lane {}, Time: {}".format(place, t['ip'].getLaneNo(), t['ip'].totalTime()))
+            t['op'].showPlace(place)
