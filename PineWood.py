@@ -65,7 +65,7 @@ class pinewood:
 
         # Wait for starting gate to be reset
         self.log.info("Waiting for starting gate to be reset.")
-        self.gate.wait_for_press()
+        self.gate.blockingReady()
 
 
         #

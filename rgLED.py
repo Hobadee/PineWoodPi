@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 
 
+from gpiozero import PWMLED
+
+
 class rgLED:
 
     # Yellow = Red=100, Green=40

@@ -5,6 +5,7 @@ from PineWood import pinewood
 from gpiozero import Button, PWMLED
 from log import *
 import gate
+import rgLED
 
 
 ###################################
@@ -38,9 +39,9 @@ log = log()
 log.setDisplayLevel('TRACE')
 
 startBtn = Button(start['input'])
-startRgLED = rgLED(start['rLED'], start['gLED'])
+startRgLED = rgLED.rgLED(start['rLED'], start['gLED'])
 
-startGate = gate(startBtn, startRgLED)
+startGate = gate.gate(startBtn, startRgLED)
 
 pinewood = pinewood(lanes, startGate, log)
 pinewood.setTimeout(5)

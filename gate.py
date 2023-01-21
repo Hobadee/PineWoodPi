@@ -13,11 +13,16 @@ class gate:
 
 
     ##
-    # Block until the start button is sensed
+    # Block until the start gate is OPEN/RACING
     #
     def blockingStart(self):
         self.start.wait_for_release()
-    
+
+    ##
+    # Block until the start gate is CLOSED
+    #
+    def blockingReady(self):
+        self.start.wait_for_press()
 
     ##
     # Return the status of the starting gate
