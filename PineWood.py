@@ -137,5 +137,7 @@ class pinewood:
 
         for index, t in enumerate(self.lanes):
             place = index + 1
+            t['ip'].setPlace(place)
+            place = t['ip'].getPlace()      # getPlace will take DNF into account
             self.log.info("Place: {}, Lane {}, Time: {}".format(place, t['ip'].getLaneNo(), t['ip'].totalTime()))
             t['op'].showPlace(place)
