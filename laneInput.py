@@ -22,7 +22,7 @@ class laneInput(threading.Thread):
     timeTotal = 0
     dnf = True          # By default, lanes have not finished
     place = None
-    run = False         # Set to True after race starts
+    didrun = False         # Set to True after race starts
 
     ##
     # Constructor
@@ -52,13 +52,13 @@ class laneInput(threading.Thread):
     #
     def run(self):
         # Flip "run" flag True
-        self.run = True
+        self.didrun = True
         self.log.debug("Running lane {}".format(self.laneNo))
         while(self.getSensor() and self.run):
             # Poll the sensor super-fast
             pass
         # As soon as the sensor trips, log the time and return
-        if(self.run == True):
+        if(self.didrun == True):
             self.timeStop = time.time()     # Log the time
             self.dnf = False                # Flag that the lane finished
             self.log.debug("Lane {} finished at {}".format(self.laneNo, self.timeStop))    
@@ -67,7 +67,7 @@ class laneInput(threading.Thread):
     # Mechanism to stop the thread
     #
     def stop(self):
-        self.run = False
+        self.didrun = False
     
 
     ##
@@ -80,7 +80,7 @@ class laneInput(threading.Thread):
     ##
     # Returns if a car is sensed by the sensor or not
     #
-    # @return Boolean True if a car is there, False otherwise
+    # @return Boolean True if a car is there, False otherwise  (Flipped?)
     #
     def getSensor(self):
         if(self.DID.value == 0):
@@ -132,6 +132,6 @@ class laneInput(threading.Thread):
     # @return Boolean True if ready to race, False if not ready to race
     #
     def isReady(self):
-        if(self.run == False and self.getSensor() == False):
+        if(self.didrun == False and self.getSensor() == True):
             return True
         return False

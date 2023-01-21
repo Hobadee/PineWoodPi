@@ -27,7 +27,7 @@ class laneOutput:
     ##
     # What to show prior to the race
     #
-    def showClear():
+    def showClear(self):
         # Red LED off
         # Green LED on
         pass
@@ -36,7 +36,7 @@ class laneOutput:
     ##
     # What to show when we have finished the race
     #
-    def showFinish():
+    def showFinish(self):
         # Red LED on
         # Green LED off
         pass
@@ -45,7 +45,7 @@ class laneOutput:
     ##
     # What to show when the race is finished and we are displaying standings
     #
-    def showPlace(place = None, lane = None):
+    def showPlace(self, place = None, lane = None):
         # First = Green
         # Second = Yellow (Green/Red)
         # Third = Red

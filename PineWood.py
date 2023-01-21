@@ -72,15 +72,18 @@ class pinewood:
         #
         # Ensure all lanes are clear
         #
-        self.log.info("Waiting for lanes to be ready")
+        qty = len(self.lanes)
+        self.log.info("Waiting for {} lanes to be ready".format(qty))
         ready = 0
         self.gate.red()
-        while ready < len(lanes):
+        while ready < qty:
+            ready = 0
+            time.sleep(1)
             for lane in self.lanes:
                 lane['op'].displayReady(lane['ip'])
                 if(lane['ip'].isReady()):
+                    self.log.debug("Lane {} ready".format(lane['ip'].getLaneNo()))
                     ready += 1
-            ready = 0
         self.gate.green()
 
 
