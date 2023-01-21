@@ -38,7 +38,7 @@ log = log()
 # DEBUG:
 log.setDisplayLevel('TRACE')
 
-startBtn = Button(start['input'])
+startBtn = Button(start['input'], False)
 startRgLED = rgLED.rgLED(start['rLED'], start['gLED'])
 
 startGate = gate.gate(startBtn, startRgLED)

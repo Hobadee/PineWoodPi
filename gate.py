@@ -29,7 +29,7 @@ class gate:
     #
     # @return Boolean True if the gate is closed/blocking, False if the gate is open
     def gateStatus(self):
-        return self.start.is_pressed()
+        return self.start.is_pressed
     
 
     ##
