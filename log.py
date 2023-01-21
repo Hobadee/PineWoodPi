@@ -4,6 +4,8 @@ import time
 import threading                    # To make logs thread-safe
 from enum import Enum, unique
 
+#import os                                               # Used for OS interaction (os.system('clear'))
+
 @unique
 class logLevels(Enum):
     NONE = 0

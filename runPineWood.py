@@ -2,7 +2,9 @@
 
 
 from PineWood import pinewood
+from gpiozero import Button, PWMLED
 from log import *
+import gate
 
 
 ###################################
@@ -10,8 +12,10 @@ from log import *
 ###################################
 
 
-# Configure start button sensor
-startBtn = 1
+# Configure the starting equipment
+# NO = 12
+# NO = 19
+start = {'input':19,'rLED':16,'gLED':13}
 
 # Configure lanes and sensors
 lanes = [{'no':1,'input':4,'rLED':20,'gLED':21},
@@ -33,7 +37,29 @@ log = log()
 # DEBUG:
 log.setDisplayLevel('TRACE')
 
-pinewood = pinewood(lanes, startBtn, log)
+startBtn = Button(start['input'])
+startRgLED = rgLED(start['rLED'], start['gLED'])
+
+startGate = gate(startBtn, startRgLED)
+
+pinewood = pinewood(lanes, startGate, log)
 pinewood.setTimeout(5)
 
 pinewood.race()
+
+
+# General flow
+#
+# 1. Instantiate race loop
+# 2. Start Loop
+# 3. Check start button = ready
+# 4. Check lanes = empty
+# 5. Green light
+# 6. Wait for start button = go
+# 7. Take starting timestamp
+# 8. Start threads to watch lanes
+# 9. On lane occupied, take ending timestamp, flag finished, calculate time, return
+# 10. Sort by times, return times & winner
+# 11. Return to step 2
+#
+

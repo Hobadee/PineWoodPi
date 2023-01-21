@@ -22,8 +22,7 @@ class laneInput(threading.Thread):
     timeTotal = 0
     dnf = True          # By default, lanes have not finished
     place = None
-
-    run = False
+    run = False         # Set to True after race starts
 
     ##
     # Constructor
@@ -81,7 +80,7 @@ class laneInput(threading.Thread):
     ##
     # Returns if a car is sensed by the sensor or not
     #
-    # True if a car is there, False otherwise
+    # @return Boolean True if a car is there, False otherwise
     #
     def getSensor(self):
         if(self.DID.value == 0):
@@ -125,3 +124,14 @@ class laneInput(threading.Thread):
             return self.place
         else:
             return None
+
+
+    ##
+    # Checks if the lane is ready to race
+    #
+    # @return Boolean True if ready to race, False if not ready to race
+    #
+    def isReady(self):
+        if(self.run == False and self.getSensor() == False):
+            return True
+        return False

@@ -1,25 +1,17 @@
 #!/usr/bin/python3
 
-import os                                               # Used for OS interaction (os.system('clear'))
-from time import sleep                                  # Used for sleep()
-import time                                             # Used for timestamps
+from time import sleep              # Used for sleep()
+import time                         # Used for timestamps
 
+#import board                       # Used to reference pins by name on the Pi
+#import digitalio                   # Used to control I/Os on the Pi
 
-import board                                            # Used to reference pins by name on the Pi
-import digitalio                                        # Used to control I/Os on the Pi
-import busio                                            # Used for SPI
+from gpiozero import Button         # Used for start sensor
 
-from gpiozero import LED, RGBLED                        # Used for LEDs and RGB LEDs
-from gpiozero import Button, DigitalInputDevice         # Used for button and break-beam
+import laneInput                    # Used to time a lane
+import laneOutput                   # Used to display lane status
 
-import laneInput                                        # Used to time a lane
-import laneOutput                                       # Used to display lane status
-
-from log import *
-
-
-#led = RGBLED(17, 18, 19)
-
+from log import *                    # Used to log what's going on
 
 
 ##
@@ -29,7 +21,7 @@ from log import *
 # Right now this isn't a class but a function.  Will need to be refactored
 class pinewood:
 
-    startBtn = None
+    gate = None
     lanes = []                  # Lanes
     log = None
 
@@ -39,9 +31,15 @@ class pinewood:
     ##
     # Constructor
     #
-    def __init__(self, lanes, startBtn, log):
+    #
+    # @var lanes Expects array of lane data - we will construct objects
+    #               This is messy and violated OOP principles - clean up
+    #               Lanes should likely be it's own object
+    # @var gate Expects a starting `gate` object
+    #
+    def __init__(self, lanes, gate, log):
         self.log = log
-        self.startBtn = Button(startBtn, True)
+        self.gate = gate
 
         # Construct lane objects
         for lane in lanes:
@@ -60,21 +58,35 @@ class pinewood:
 
     ##
     # Main program to run
-    # This is messy and will likely require cleanup/refactor
+    # This is very messy and requires cleanup/refactor
     #
     def race(self):
+
+
+        # Wait for starting gate to be reset
+        self.log.info("Waiting for starting gate to be reset.")
+        self.gate.wait_for_press()
+
 
         #
         # Ensure all lanes are clear
         #
-        # TODO: Implement me!
-        for lane in self.lanes:
-            lane['op'].displayReady(lane['ip'])
-        
+        self.log.info("Waiting for lanes to be ready")
+        ready = 0
+        self.gate.red()
+        while ready < len(lanes):
+            for lane in self.lanes:
+                lane['op'].displayReady(lane['ip'])
+                if(lane['ip'].isReady()):
+                    ready += 1
+            ready = 0
+        self.gate.green()
+
+
         # Await starting gate
-        self.log.info("Awaiting starting gate.")
-        while self.startBtn == False:
-            pass
+        self.log.info("Waiting starting gate to open.")
+        self.gate.blockingStart()
+
 
         # Get the starting timestamp (as seconds)
         start = time.time()
@@ -119,21 +131,5 @@ class pinewood:
 
         for index, t in enumerate(self.lanes):
             self.log.info("Place: {}, Lane {}, Time: {}".format(index + 1, t['ip'].getLaneNo(), t['ip'].totalTime()))
-
-
-
-# General flow
-#
-# 1. Instantiate race loop
-# 2. Start Loop
-# 3. Check start button = ready
-# 4. Check lanes = empty
-# 5. Green light
-# 6. Wait for start button = go
-# 7. Take starting timestamp
-# 8. Start threads to watch lanes
-# 9. On lane occupied, take ending timestamp, flag finished, calculate time, return
-# 10. Sort by times, return times & winner
-# 11. Return to step 2
-#
+            t['op'].showPlace()
 

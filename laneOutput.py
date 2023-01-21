@@ -2,7 +2,7 @@
 
 
 import laneOutputDisplayReady
-
+from gpiozero import PWMLED
 
 ##
 # Class to display lane status
@@ -17,9 +17,11 @@ class laneOutput:
     ##
     # Constructor
     #
+    # We should change r/g LEDs to rgLED object
+    #
     def __init__(self, rLED, gLED):
-        self.redLED = rLED
-        self.greenLED = gLED
+        self.redLED = PWMLED(rLED)
+        self.greenLED = PWMLED(gLED)
     
 
     ##
@@ -51,16 +53,49 @@ class laneOutput:
         if (place == None and lane == None):
             # Throw an error or some shit
             pass
+        
+        # If we are passed a lane, get it's place
         if (lane):
             place = lane.getPlace()
+        
         # Display based off place
-        pass
+        if(place == 1):
+            self.green()
+        elif(place == 2):
+            self.yellow()
+        elif(place == 3):
+            self.red()
+        else:
+            self.off()
+
 
 
     ##
     # Displays whether the lane is ready to race or not.
     #
     def displayReady(self, lane):
-#        self.laneOPDisplayReady = laneOutputDisplayReady()
+        if (lane.isReady()):
+            self.green()
+            return
+        self.red()
+    
 
-        pass
+    ##
+    # Methods to set static colors
+    #
+    def off(self):
+        self.redLED.value = 0.0
+        self.greenLED.value = 0.0
+
+    def red(self):
+        self.redLED.value = 1.0
+        self.greenLED.value = 0.0
+    
+    def yellow(self):
+        # Yellow = Red=100, Green=40
+        self.redLED.value = 1.0
+        self.greenLED.value = 0.4
+    
+    def green(self):
+        self.redLED.value = 0.0
+        self.greenLED.value = 0.4
